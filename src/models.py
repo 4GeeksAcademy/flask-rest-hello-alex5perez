@@ -8,6 +8,7 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
     planet_favorite = db.relationship('FavoritePlanets', back_populates='users')
+    people_favorite = db.relationship('FavoritePeople', back_populates='users')
 
     def __repr__(self):
         return '<User %r>' % self.email
@@ -25,6 +26,7 @@ class People(db.Model):
     age = db.Column(db.Integer, unique=False, nullable=False)
     planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'))
     planet = db.relationship('Planet', back_populates='people')
+    favorite_by = db.relationship('FavoritePeople', back_populates='people_favorites')
 
     def __repr__(self):
         return f'El personaje {self.id} con nombre {self.name}'
@@ -63,8 +65,18 @@ class FavoritePlanets(db.Model):
     users = db.relationship('User', back_populates='planet_favorite')
     planet_id = db.Column(db.Integer, db.ForeignKey('planet.id'))
     planets_favorites = db.relationship('Planet', back_populates='favorite_by')
-    people_id = db.Column(db.Integer, db.ForeignKey('people.id'))
-    people_favorites = db.relationship('People')
 
     def __repr__(self):
-        return f'Al usuario {self.user_id} le gusta el planeta {self.planet_id} o el personaje {self.people_id}'
+        return f'Al usuario {self.user_id} le gusta el planeta {self.planet_id}'
+
+
+class FavoritePeople(db.Model):
+    __tablename__ = 'favorite_people'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    users = db.relationship('User', back_populates='people_favorite')
+    people_id = db.Column(db.Integer, db.ForeignKey('people.id'))
+    people_favorites = db.relationship('People', back_populates='favorite_by')
+
+    def __repr__(self):
+        return f'Al usuario {self.user_id} le gusta el personaje {self.people_id}'
